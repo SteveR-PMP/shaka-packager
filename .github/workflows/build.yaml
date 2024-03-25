@@ -83,7 +83,9 @@ jobs:
         lib_type: ["static", "shared"]
 
     name: ${{ matrix.os_name }} ${{ matrix.target_arch }} ${{ matrix.build_type }} ${{ matrix.lib_type }}
-    runs-on: ${{ matrix.os }}
+    #runs-on: ${{ matrix.os }}
+    runs-on: self-hosted
+
 
     steps:
       - name: Configure git to preserve line endings
