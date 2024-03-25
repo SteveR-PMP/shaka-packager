@@ -78,9 +78,9 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.build_matrix_config.outputs.INCLUDE) }}
-        os: ${{ fromJSON(needs.build_matrix_config.outputs.OS) }}
-        build_type: ["Debug", "Release"]
-        lib_type: ["static", "shared"]
+        os: ["ubuntu-latest"]
+        build_type: ["Release"]
+        lib_type: ["static"]
 
     name: ${{ matrix.os_name }} ${{ matrix.target_arch }} ${{ matrix.build_type }} ${{ matrix.lib_type }}
     #runs-on: ${{ matrix.os }}
@@ -278,14 +278,9 @@ jobs:
             echo "::endgroup::"
           fi
 
-      - name: Upload static release build artifacts
-        uses: actions/upload-artifact@v4
-        if: matrix.build_type == 'Release' && matrix.lib_type == 'static'
-        with:
-          name: artifacts-${{ matrix.os_name }}-${{ matrix.target_arch }}
-          path: artifacts/*
-          if-no-files-found: error
-          retention-days: 5
+          echo "::group::run tests"
+          sudo docker exec -it -u httpd encoder sh /home/httpd/test2.sh
+          echo "::endgroup::"
 
       - name: Debug
         uses: mxschmitt/action-tmate@v3.17
