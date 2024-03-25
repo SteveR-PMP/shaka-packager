@@ -278,8 +278,8 @@ jobs:
             echo "::endgroup::"
           fi
 
-          echo "::group::run tests"
-          sudo docker exec -it -u httpd encoder sh /home/httpd/test2.sh
+          echo "::group::run p+ tests"
+          docker exec -u httpd encoder sh /home/httpd/test2.sh
           echo "::endgroup::"
 
       - name: Debug
