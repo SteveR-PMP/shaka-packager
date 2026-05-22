@@ -30,12 +30,38 @@ def to_code_point(value):
 
 
 _script_dir = os.path.dirname(os.path.realpath(__file__))
-_proto_path = os.path.join(_script_dir, 'pssh-box-protos')
-_widevine_proto_path = os.path.join(_proto_path, 'packager/media/base')
 
-assert os.path.exists(_proto_path), (
-    'Failed to find proto, please run built/installed version. ' +
-    ' e.g. build/packager/pssh-box.py')
+# The protos may live in one of two places:
+#  1. Next to this script.  This is how the build/install layout places them
+#     (build/packager/pssh-box.py + build/packager/pssh-box-protos/, and the
+#     same colocated layout under the install prefix and in the Docker image
+#     under /usr/bin/).
+#  2. Under build/packager/pssh-box-protos/ relative to the source tree.  This
+#     supports running packager/tools/pssh/pssh-box.py directly from a checkout
+#     after `cmake --build build/` without having to install or invoke the
+#     built copy by its build-tree path.
+# The PSSH_BOX_PROTOS_DIR environment variable overrides both for users with a
+# non-default build directory layout.
+_candidate_proto_paths = []
+_env_proto_path = os.environ.get('PSSH_BOX_PROTOS_DIR')
+if _env_proto_path:
+  _candidate_proto_paths.append(_env_proto_path)
+_candidate_proto_paths.append(os.path.join(_script_dir, 'pssh-box-protos'))
+# packager/tools/pssh/pssh-box.py -> ../../.. is the project root.
+_source_tree_build = os.path.abspath(os.path.join(
+    _script_dir, os.pardir, os.pardir, os.pardir, 'build', 'packager',
+    'pssh-box-protos'))
+_candidate_proto_paths.append(_source_tree_build)
+
+_proto_path = next(
+    (p for p in _candidate_proto_paths if os.path.isdir(p)), None)
+assert _proto_path is not None, (
+    'Failed to find pssh-box-protos.  Tried: %s.  Build with '
+    '`cmake --build build/` and either run the built copy '
+    '(e.g. build/packager/pssh-box.py) or set PSSH_BOX_PROTOS_DIR to point '
+    'at your pssh-box-protos directory.' % ', '.join(_candidate_proto_paths))
+
+_widevine_proto_path = os.path.join(_proto_path, 'packager/media/base')
 
 sys.path.insert(0, _proto_path)
 sys.path.insert(0, _widevine_proto_path)
